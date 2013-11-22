@@ -2,6 +2,8 @@ var inputFile = "resources/input2.csv";
 var javaScriptFunction = "var func = function(a,b){return document.title+' - '+a+' - '+b;};";
 var outputFile = "resources/output.csv";
 
+var startTime;
+
 if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
     return this.slice(0, str.length) == str;
@@ -76,9 +78,11 @@ function rowProcessing() {
         counter += 1;
         run(counter-1, rowProcessing);
     } else {
+		console.log("Time: "+((new Date()).getTime()-startTime));
 		output.close();
         phantom.exit();
     }
 }
 
+startTime = (new Date()).getTime();
 rowProcessing();
