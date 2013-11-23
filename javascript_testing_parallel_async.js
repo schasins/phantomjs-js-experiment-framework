@@ -8,7 +8,7 @@ var fs = require('fs'),
     async = require('async');
 
 var inputFile = "resources/input2.csv";
-var javaScriptFunction = "var func = function(a,b){return document.title+' - '+a+' - '+b;};";
+var javaScriptFile = "resources/titleExtractor.js";
 var outputFile = "resources/output.csv";
 
 var startTime;
@@ -42,6 +42,21 @@ if (content) {
 		row = lines[i].split(',');
         rows.push(row);
     }
+}
+
+//Input 2
+
+var javaScriptFunction = '',
+    input2 = null;
+try {
+    input2 = fs.open(javaScriptFile, "r");
+    javaScriptFunction = input2.read();
+} catch (e) {
+    console.log(e);
+	console.log("Failed to open second input file.");
+}
+if (input2) {
+    input2.close();
 }
 
 //Output
