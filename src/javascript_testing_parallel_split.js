@@ -17,6 +17,7 @@ var javaScriptFile = system.args[2];
 var outputFile = system.args[3];
 var start = system.args[4];
 var end = system.args[5];
+var loadJquery = true;
 
 var startTime;
 
@@ -86,6 +87,7 @@ function run(row,callback){
         if (status === 'fail') {
             console.log('Unable to access network');
         } else {
+			if(loadJquery){page.injectJs('jquery-1.10.2.min.js');}
 			var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
 			result = result + (ans+eol);
         }
