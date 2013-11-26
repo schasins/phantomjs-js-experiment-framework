@@ -87,9 +87,10 @@ function run(row,callback){
         if (status === 'fail') {
             console.log('Unable to access network');
         } else {
-			if(loadJquery){page.injectJs('jquery-1.10.2.min.js');}
+			if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
 			var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
-			result = result + (ans+eol);
+			console.log(ans);
+			output.write(ans+eol);
         }
         page.release();
         callback();
