@@ -92,7 +92,7 @@ public class RunSplit {
 	    		Process tr = Runtime.getRuntime().exec( new String[]{ "phantomjs-1.9.2-linux-i686/bin/phantomjs", "src/javascript_testing_parallel_split.js", inputFile, javaScriptFile, outputFile, Integer.toString(start), Integer.toString(end) } );
 	    		
 	    		//use this line if need to time the program
-	    		try{tr.waitFor();}catch(Exception e){System.out.println("Not able to wait for thread.");}
+	    		//try{tr.waitFor();}catch(Exception e){System.out.println("Not able to wait for thread.");}
 	    		
 	    		
 	    		//Print the subprograms' outputs
@@ -115,7 +115,7 @@ public class RunSplit {
 	
 	public static void main(String[] args) {
 		String inputFile = "resources/input2.csv";
-		String javaScriptFile = "resources/titleExtractor.js";
+		String javaScriptFile = "resources/javaScript.js";
 		String outputFile = "resources/output.csv";
 		
 		RunSplit runner = new RunSplit(inputFile,javaScriptFile,outputFile);
