@@ -55,11 +55,11 @@ if (content) {
 
 //Input 2
 
-var javaScriptFunction = '',
+var javaScriptFunctions = '',
     input2 = null;
 try {
     input2 = fs.open(javaScriptFile, "r");
-    javaScriptFunction = input2.read();
+    javaScriptFunctions = input2.read();
 } catch (e) {
     console.log(e);
 	console.log("Failed to open second input file: "+javaScriptFile);
@@ -67,6 +67,17 @@ try {
 if (input2) {
     input2.close();
 }
+
+var functions = 0;
+while(true){
+	if(javaScriptFunctions.indexOf("var func"+(functions+1)) > -1){
+		functions+=1;
+	}
+	else{
+		break;
+	}
+}
+console.log("functions: "+this.functions);
 
 //Output
 
@@ -87,10 +98,40 @@ function run(row,callback){
         if (status === 'fail') {
             console.log('Unable to access network');
         } else {
+        
+        	var loadInProgress = false;
+        	
+    	    page.onLoadStarted = function() {
+			  loadInProgress = true;
+			  console.log("load started");
+			};
+			
+			page.onLoadFinished = function() {
+			  loadInProgress = false;
+			  console.log("load finished");
+			};
+			
 			if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
-			var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
-			console.log(ans);
-			output.write(ans+eol);
+        
+        	for (var i = 0; i<functions; i++){
+        	    //console.log("f: "+(i+1));
+				//continually check whether page is loaded until it is and we can run the function
+				setInterval(function(){
+					if (!loadInProgress) {
+					    try{
+						var ans = page.evaluate("function(){"+javaScriptFunction+" return func"+(i+1)+"("+argString+");}");
+						//console.log(ans);
+						output.write(ans+eol);
+						clearInterval();
+						//console.log("ran");
+						}catch(err){console.log("no run");}
+					}
+					else{
+					   //console.log("waiting to run");
+					}
+				}, 50);
+				
+        	}
         }
         page.release();
         callback();
