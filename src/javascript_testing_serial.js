@@ -1,7 +1,17 @@
-var inputFile = "resources/input2.csv";
-var javaScriptFile = "resources/titleExtractor.js";
-var outputFile = "resources/output.csv";
-var loadJquery = true;
+/*
+  requires: phantomjs
+  usage: phantomjs-1.9.2-linux-i686/bin/phantomjs src/javascript_testing_serial.js
+*/
+
+var fs = require('fs'),
+system = require('system');
+
+var inputFile = "resources/input.csv";
+var javaScriptFile = "resources/javaScript.js";
+var outputFile = system.args[1];
+var loadJquery = false;
+
+console.log(outputFile)
 
 var startTime;
 
@@ -10,9 +20,6 @@ if (typeof String.prototype.startsWith != 'function') {
 	return this.slice(0, str.length) == str;
     };
 }
-
-var fs = require('fs'),
-system = require('system');
 
 //Input 1
 var content = '',
@@ -68,7 +75,9 @@ try {
 var counter = 0;
 
 function run(index, callback) {
+    var t0 = (new Date()).getTime();
     var page = require('webpage').create();
+    var t1 = (new Date()).getTime();
     row = rows[index];
     for(var j = 1; j < row.length; j++){
 	row[j] = "'"+row[j]+"'";
@@ -81,10 +90,12 @@ function run(index, callback) {
         if (status === 'fail') {
             console.log('Unable to access network');
         } else {
+	    var t2 = (new Date()).getTime();
 	    if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
 	    var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
+	    var t3 = (new Date()).getTime();
 	    console.log(ans);
-	    output.write(ans+eol);
+	    output.write(url + ';' + ans + ';' + (t1-t0) + ';' + (t2-t1) + ';' + (t3-t2) + eol);
         }
         page.release();
         callback.apply();
@@ -96,11 +107,13 @@ function rowProcessing() {
         counter += 1;
         run(counter-1, rowProcessing);
     } else {
-	console.log("Time: "+((new Date()).getTime()-startTime));
+	var stop = (new Date()).getTime()-startTime;
+	output.write("TOTAL;" + stop);
 	output.close();
         phantom.exit();
     }
 }
 
+output.write('url;title;start-up;load;execute' + eol);
 startTime = (new Date()).getTime();
 rowProcessing();

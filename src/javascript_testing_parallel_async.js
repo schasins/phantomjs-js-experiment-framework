@@ -7,10 +7,10 @@ var fs = require('fs'),
 system = require('system'),
 async = require('async');
 
-var inputFile = "resources/input2.csv";
-var javaScriptFile = "resources/titleExtractor.js";
-var outputFile = "resources/output.csv";
-var loadJquery = true;
+var inputFile = "resources/input.csv";
+var javaScriptFile = "resources/javaScript.js";
+var outputFile = system.args[1];
+var loadJquery = false;
 
 var startTime;
 
@@ -72,7 +72,9 @@ try {
 //Execution
 
 function run(row,callback){
+    var t0 = (new Date()).getTime();
     var page = require('webpage').create();
+    var t1 = (new Date()).getTime();
     for(var j = 1; j < row.length; j++){
 	row[j] = "'"+row[j]+"'";
     }
@@ -84,10 +86,12 @@ function run(row,callback){
         if (status === 'fail') {
             console.log('Unable to access network');
         } else {
+	    var t2 = (new Date()).getTime();
 	    if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
 	    var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
+	    var t3 = (new Date()).getTime();
 	    console.log(ans);
-	    output.write(ans+eol);
+	    output.write(url + ';' + ans + ';' + (t1-t0) + ';' + (t2-t1) + ';' + (t3-t2) + eol);
         }
         page.release();
         callback();
@@ -95,11 +99,13 @@ function run(row,callback){
 }
 
 function finish(err){
-    console.log("Time: "+((new Date()).getTime()-startTime));
+    var t = (new Date()).getTime()-startTime;
+    output.write("TOTAL;" + t);
     output.close();
     phantom.exit();
     return;
 }
 
+output.write('url;title;start-up;load;execute' + eol);
 startTime = (new Date()).getTime();
 async.each(rows,run,finish);
