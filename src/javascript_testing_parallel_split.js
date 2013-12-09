@@ -1,6 +1,6 @@
 /*
   requires: phantomjs, async
-  usage: phantomjs-1.9.2-linux-i686/bin/phantomjs javascript_testing_parallel_split.js inputFile javaScriptFile outputFile start end
+  usage: phantomjs-1.9.2-linux-i686/bin/phantomjs src/javascript_testing_parallel_split.js inputFile javaScriptFile outputFile start end
 */
 
 var fs = require('fs'),
@@ -77,6 +77,14 @@ var result = "";
 function run(row,callback){
     var t0 = (new Date()).getTime();
     var page = require('webpage').create();
+    page.settings.resourceTimeout = 10000; // 10 seconds
+	page.onResourceTimeout = function(e) {
+	  console.log(e.errorCode);   // it'll probably be 408 
+	  console.log(e.errorString); // it'll probably be 'Network timeout on resource'
+	  console.log(e.url);         // the url whose request timed out
+	  output.write(e.url + ';' + 'timeout' + eol);
+	  //whatever else we might want to do on a failure?
+	};
     var t1 = (new Date()).getTime();
     for(var j = 1; j < row.length; j++){
 	row[j] = "'"+row[j]+"'";
