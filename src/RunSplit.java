@@ -36,6 +36,9 @@ public class RunSplit {
 		}
 		this.rows = rows;
 
+	}
+	
+	public void execute(int threads){
 		//since we'll be appending, let's clear it first
 		try{
 			PrintWriter output = new PrintWriter(outputFile); 
@@ -45,9 +48,8 @@ public class RunSplit {
 		catch(Exception e){
 			System.out.println("Not able to clear output file.");
 		}
-	}
-	
-	public void execute(int threads){
+		
+		long start = System.currentTimeMillis();
 		int jobs = rows.size();
 		if (threads > jobs){
 			threads = jobs;
@@ -70,7 +72,17 @@ public class RunSplit {
 		for (Thread thread : threadList) {
 		    try {thread.join();} catch (InterruptedException e) {System.out.println("Could not join thread.");}
 		}
+
+		long stop = System.currentTimeMillis();
 		
+		try{
+			PrintWriter output = new PrintWriter(new FileWriter(outputFile, true));
+			output.println("TOTAL;" + String.valueOf(stop-start)); 
+			output.close();
+		}
+		catch(Exception e){
+			System.out.println("Not able to clear output file.");
+		}
 	}
 	
 	private static class RunTests implements Runnable {
@@ -90,7 +102,9 @@ public class RunSplit {
 		
 	    public void run() {
 	    	try {
-	    		Process tr = Runtime.getRuntime().exec( new String[]{ "phantomjs-1.9.2-linux-i686/bin/phantomjs", "src/javascript_testing_parallel_split.js", inputFile, javaScriptFile, outputFile, Integer.toString(start), Integer.toString(end) } );
+	    		Process tr = Runtime.getRuntime().exec( new String[]{ "phantomjs-1.9.2-linux-i686/bin/phantomjs", 
+	    				"src/javascript_testing_parallel_split.js", inputFile, javaScriptFile, outputFile, 
+	    				Integer.toString(start), Integer.toString(end) } );
 	    		
 	    		//use this line if need to time the program
 	    		//try{tr.waitFor();}catch(Exception e){System.out.println("Not able to wait for thread.");}
@@ -115,23 +129,24 @@ public class RunSplit {
 	}
 	
 	public static void main(String[] args) {
-		String inputFile = "resources/input.csv";
+		String inputFile = "resources/input2.csv";
 		String javaScriptFile = "resources/javaScript.js";
-		String outputFile = "resources/output-split.csv";
-
-		long start = System.currentTimeMillis();
+		
+		String outputFile = "output-split1.csv";
 		RunSplit runner = new RunSplit(inputFile,javaScriptFile,outputFile);
 		runner.execute(8);
-		long stop = System.currentTimeMillis();
-		
-		try{
-			PrintWriter output = new PrintWriter(new FileWriter(outputFile, true));
-			output.println("TOTAL;" + String.valueOf(stop-start)); 
-			output.close();
-		}
-		catch(Exception e){
-			System.out.println("Not able to clear output file.");
-		}
+		/*outputFile = "output-split2.csv";
+		runner = new RunSplit(inputFile,javaScriptFile,outputFile);
+		runner.execute(8);
+		outputFile = "output-split3.csv";
+		runner = new RunSplit(inputFile,javaScriptFile,outputFile);
+		runner.execute(8);
+		outputFile = "output-split4.csv";
+		runner = new RunSplit(inputFile,javaScriptFile,outputFile);
+		runner.execute(8);
+		outputFile = "output-split5.csv";
+		runner = new RunSplit(inputFile,javaScriptFile,outputFile);
+		runner.execute(8);*/
 	}
 
 }

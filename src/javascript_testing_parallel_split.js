@@ -78,13 +78,15 @@ function run(row,callback){
     var t0 = (new Date()).getTime();
     var page = require('webpage').create();
     page.settings.resourceTimeout = 10000; // 10 seconds
-	page.onResourceTimeout = function(e) {
-	  console.log(e.errorCode);   // it'll probably be 408 
-	  console.log(e.errorString); // it'll probably be 'Network timeout on resource'
-	  console.log(e.url);         // the url whose request timed out
-	  output.write(e.url + ';' + 'timeout' + eol);
-	  //whatever else we might want to do on a failure?
-	};
+    page.onResourceTimeout = function(e) {
+	console.log(e.errorCode);   // it'll probably be 408 
+	console.log(e.errorString); // it'll probably be 'Network timeout on resource'
+	console.log(e.url);         // the url whose request timed out
+	result+=(e.url + ';' + 'timeout' + eol);
+	// whatever else we might want to do on a failure?
+        page.release();
+        callback();
+    };
     var t1 = (new Date()).getTime();
     for(var j = 1; j < row.length; j++){
 	row[j] = "'"+row[j]+"'";
@@ -112,17 +114,17 @@ function run(row,callback){
 
 function finish(err){
     console.log("Time: "+((new Date()).getTime()-startTime));
-    //Output
+    output.write(result);
     var output = null;
     try {
-	output = fs.open(outputFile, "a");
+    	output = fs.open(outputFile, "a");
+    	// console.log(result);
+    	output.write(result);
+    	output.close();
     } catch (e) {
-	console.log(e);
-	console.log("Failed to open output file.");
+    	console.log(e);
+    	console.log("Failed to open output file.");
     }
-    //console.log(result);
-    output.write(result);
-    output.close();
     phantom.exit();
     return;
 }
