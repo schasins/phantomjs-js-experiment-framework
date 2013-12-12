@@ -12,9 +12,10 @@ if (system.args.length < 6) {
     phantom.exit(1);
 }
 
+var id = system.args[6];
 var inputFile = system.args[1];
 var javaScriptFile = system.args[2];
-var outputFile = system.args[3];
+var outputFile = system.args[3] + id + ".csv";
 var start = system.args[4];
 var end = system.args[5];
 var loadJquery = false;
@@ -79,10 +80,11 @@ function run(row,callback){
     var page = require('webpage').create();
     page.settings.resourceTimeout = 10000; // 10 seconds
     page.onResourceTimeout = function(e) {
-	console.log(e.errorCode);   // it'll probably be 408 
-	console.log(e.errorString); // it'll probably be 'Network timeout on resource'
-	console.log(e.url);         // the url whose request timed out
-	result+=(e.url + ';' + 'timeout' + eol);
+	// console.log(e.errorCode);   // it'll probably be 408 
+	// console.log(e.errorString); // it'll probably be 'Network timeout on resource'
+	// console.log(e.url);         // the url whose request timed out
+	console.log(e.url + ';' + 'timeout')
+	result+=(url + ';' + 'timeout' + eol);
 	// whatever else we might want to do on a failure?
         page.release();
         callback();
@@ -97,14 +99,16 @@ function run(row,callback){
     if (!url.startsWith("http")){url = "http://"+url;}
     page.open(url, function (status) {
         if (status === 'fail') {
-            console.log('Unable to access network');
+            //console.log('Unable to access network');
+	    console.log(url + ';' + 'Unable to access network')
 	    result+=(url + ';' + 'Unable to access network' + eol);
         } else {
 	    var t2 = (new Date()).getTime();
 	    if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
 	    var ans = page.evaluate("function(){"+javaScriptFunction+" return func("+argString+");}");
 	    var t3 = (new Date()).getTime();
-	    console.log(ans);
+	    //console.log(ans);
+	    console.log(url + ';' + ans)
 	    result+=(url + ';' + ans + ';' + (t1-t0) + ';' + (t2-t1) + ';' + (t3-t2) + eol);
         }
         page.release();
@@ -113,8 +117,7 @@ function run(row,callback){
 }
 
 function finish(err){
-    console.log("Time: "+((new Date()).getTime()-startTime));
-    output.write(result);
+    //console.log("Time: "+((new Date()).getTime()-startTime));
     var output = null;
     try {
     	output = fs.open(outputFile, "a");
@@ -129,5 +132,12 @@ function finish(err){
     return;
 }
 
+try {
+    output = fs.open(outputFile, "w");
+    output.close();
+} catch (e) {
+    console.log(e);
+    console.log("Failed to open output file.");
+}
 startTime = (new Date()).getTime();
 async.each(rows,run,finish);

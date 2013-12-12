@@ -94,6 +94,7 @@ function run(row,callback){
     page.open(url, function (status) {
         if (status === 'fail') {
             console.log('Unable to access network');
+	    output.write(url + ';Unable to access network');
         } else {
 	    var t2 = (new Date()).getTime();
 	    if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}

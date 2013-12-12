@@ -82,7 +82,7 @@ function run(index, callback) {
 	  console.log(e.errorCode);   // it'll probably be 408 
 	  console.log(e.errorString); // it'll probably be 'Network timeout on resource'
 	  console.log(e.url);         // the url whose request timed out
-	  output.write(e.url + ';' + 'timeout' + eol);
+	  output.write(url + ';' + 'timeout' + eol);
 	  //whatever else we might want to do on a failure?
 	};
     var t1 = (new Date()).getTime();
@@ -97,6 +97,7 @@ function run(index, callback) {
     page.open(url, function (status) {
         if (status === 'fail') {
             console.log('Unable to access network');
+	    output.write(url + ';Unable to access network' + eol)
         } else {
 	    var t2 = (new Date()).getTime();
 	    if(loadJquery){page.injectJs('resources/jquery-1.10.2.min.js');}
